@@ -225,6 +225,33 @@
             100% { transform: rotate(360deg); }
         }
         
+        .main-prediction {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .main-prediction h3 {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .main-prediction .class-name {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .main-prediction .confidence-percentage {
+            font-size: 1.3em;
+            opacity: 0.95;
+        }
+        
         .disease-info {
             background: #fff3cd;
             border: 1px solid #ffc107;
@@ -370,6 +397,12 @@
             <!-- Results Section -->
             <div class="card results-section" id="resultsSection">
                 <h2>📊 Analysis Results</h2>
+                
+                <div class="main-prediction" id="mainPrediction">
+                    <h3>Primary Prediction</h3>
+                    <div class="class-name" id="mainClassName">-</div>
+                    <div class="confidence-percentage" id="mainConfidence">-</div>
+                </div>
                 
                 <div id="resultsContainer"></div>
                 
@@ -567,8 +600,26 @@
             const topPrediction = predictions[0];
             const isHealthy = topPrediction.class.toLowerCase().includes('healthy');
             
-            // Display top predictions
-            predictions.slice(0, 3).forEach(pred => {
+            // Display main prediction prominently
+            const mainClassName = document.getElementById('mainClassName');
+            const mainConfidence = document.getElementById('mainConfidence');
+            const percentage = (topPrediction.confidence * 100).toFixed(1);
+            
+            mainClassName.textContent = topPrediction.class;
+            mainConfidence.textContent = `Confidence: ${percentage}%`;
+            
+            // Change color based on confidence
+            const mainPredictionDiv = document.getElementById('mainPrediction');
+            if (topPrediction.confidence >= 0.85) {
+                mainPredictionDiv.style.background = 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)';
+            } else if (topPrediction.confidence >= 0.70) {
+                mainPredictionDiv.style.background = 'linear-gradient(135deg, #f39c12 0%, #e67e22 100%)';
+            } else {
+                mainPredictionDiv.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+            }
+            
+            // Display all predictions
+            predictions.forEach(pred => {
                 const resultItem = document.createElement('div');
                 resultItem.className = 'result-item';
                 
@@ -584,6 +635,17 @@
                 
                 resultsContainer.appendChild(resultItem);
             });
+            
+            // Add a note about the predictions
+            const noteDiv = document.createElement('div');
+            noteDiv.style.background = '#f8f9fa';
+            noteDiv.style.padding = '15px';
+            noteDiv.style.borderRadius = '8px';
+            noteDiv.style.marginTop = '20px';
+            noteDiv.style.fontSize = '0.9em';
+            noteDiv.style.color = '#666';
+            noteDiv.innerHTML = `<strong>📋 All Predictions:</strong> The model evaluated ${predictions.length} possible disease classes. The primary prediction above is the most likely result.`;
+            resultsContainer.appendChild(noteDiv);
             
             // Show disease info or healthy info
             if (isHealthy) {
